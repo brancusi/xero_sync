@@ -7,7 +7,7 @@ default: &default
 
 development:
   <<: *default
-  database: xero_syncer_development
+  database: in_spiritus_development
 
 test:
   <<: *default
