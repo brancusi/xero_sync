@@ -3,8 +3,6 @@ namespace :sync do
   desc "Sync all unsynced records to xero"
 
   task :all => :environment do
-    redis = Redis.new
-
     last_synced_timestamp = DateTime.parse(redis.get("xero_syncer_last_synced"))
 
     new_timestamp = DateTime.now
