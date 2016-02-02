@@ -20,3 +20,7 @@ pbcopy < publickey.cer
   1. *XERO_PRIVATE_KEY* : __Required__ `pbcopy < privatekey.pem`
   1. *REDIS_HOST* : __Required__
   1. *SECRET_KEY_BASE*: __Required__
+  1. *POSTGRESQL_DATABASE*: __Required__
+  1. *POSTGRESQL_ADDRESS*: __Required__
+  1. *POSTGRESQL_USERNAME*: __Required__
+  1. *POSTGRESQL_PASSWORD*: __Required__
