@@ -1,7 +1,11 @@
 staging:
     postgresql:
         server: external
+    redis:
+        server: external
 
 production:
     postgresql:
+        server: external
+    redis:
         server: external
