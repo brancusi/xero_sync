@@ -4,7 +4,7 @@ namespace :sync do
 
   task :all => :environment do
 
-    redis = Redis.new(:host => ENV['REDIS_HOST'])
+    redis = Redis.new
 
     last_synced_timestamp = DateTime.parse(redis.get("xero_syncer_last_synced"))
 
