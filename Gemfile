@@ -1,12 +1,13 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.2.4'
+gem 'rails', '4.2.5'
 gem 'rake', '10.4.2'
 gem 'pg', '0.17.1'
-gem "xeroizer", :git => 'git://github.com/waynerobinson/xeroizer.git'
+gem 'xeroizer', :git => 'git://github.com/waynerobinson/xeroizer.git'
 gem 'sidekiq'
 gem 'sinatra', '>= 1.3.0', :require => nil
 gem 'redis'
+gem 'monadic'
 
 group :development do
   gem 'better_errors'
