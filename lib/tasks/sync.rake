@@ -6,8 +6,9 @@ namespace :sync do
 
     redis = Redis.new
 
+    # If this is the first time we are syncing, let's go back to the start of time
     last_sync = Maybe(redis.get("xero_syncer_last_synced")).fetch(100.years.ago.to_s)
-    
+
     last_synced_timestamp = DateTime.parse(last_sync)
 
     new_timestamp = DateTime.now
