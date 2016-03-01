@@ -1,7 +1,5 @@
 ### Setup
 
-#### Staging
-
 1. Generate keys:
 
     ```bash
@@ -16,12 +14,17 @@
 1. Select the demo account
 1. Paste in the public key
 1. Add in the following env vars to the stack
-  1. *XERO_API_KEY* : __Required__
-  1. *XERO_SECRET* : __Required__
-  1. *XERO_PRIVATE_KEY* : __Required__ `pbcopy < privatekey.pem`
-  1. *REDIS_URL* : __Required__
-  1. *SECRET_KEY_BASE*: __Required__
-  1. *POSTGRESQL_DATABASE*: __Required__
-  1. *POSTGRESQL_ADDRESS*: __Required__
-  1. *POSTGRESQL_USERNAME*: __Required__
-  1. *POSTGRESQL_PASSWORD*: __Required__
+  1. __XERO_API_KEY__ : *required*
+  1. __XERO_SECRET__ : *required*
+  1. __XERO_PRIVATE_KEY__ : *required* `pbcopy < privatekey.pem`
+  1. __REDIS_URL__ : *required*
+  1. __SECRET_KEY_BASE__ : *required*
+  1. __POSTGRESQL_DATABASE__ : *required*
+  1. __POSTGRESQL_ADDRESS__ : *required*
+  1. __POSTGRESQL_USERNAME__ : *required*
+  1. __POSTGRESQL_PASSWORD__ : *required*
+
+
+### Dev
+
+Start Redis: redis-server /usr/local/etc/redis.conf

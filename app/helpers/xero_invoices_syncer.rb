@@ -2,7 +2,11 @@ class XeroInvoicesSyncer < BaseXeroSyncer
   include XeroUtils
 
   def batch_save_records(records)
-    xero_client.Invoice.save_records(records)
+    begin
+      xero_client.Invoice.save_records(records)
+    rescue => errors
+      p "Error batch saving: #{errors}"
+    end
   end
 
   protected
@@ -16,27 +20,38 @@ class XeroInvoicesSyncer < BaseXeroSyncer
     end
 
     def update_xero_record (record, model)
-      record.invoice_number = "testing9-nov-2015-#{model.id}"
-      record.date = model.delivery_date
-      record.due_date = model.delivery_date + model.client.terms
-      record.status = "SUBMITTED"
-      record.type = "ACCREC"
-      record.build_contact(contact_id:model.client.xero_id, name:model.client.full_name)
-      create_sales_order_items(record, model)
+      p 'updating'
+      if record.status == 'DELETED'
+        delete_order(model)
+        return nil
+      else
+        record.invoice_number = "testing9-nov-2015-#{model.id}"
+        record.date = model.delivery_date
+        record.due_date = model.delivery_date + model.location.company.terms
+        record.status = "DRAFT"
+        record.type = "ACCREC"
+        record.build_contact(contact_id:model.location.xero_id, name:model.location.full_name)
+        create_order_items(record, model)
+      end
     end
 
     def create_xero_record (model)
+      p 'creating'
       update_xero_record(xero_client.Invoice.build(), model)
     end
 
-    def create_sales_order_items (record, model)
+    def delete_order (model)
+      p 'will delete order'
+    end
+
+    def create_order_items (record, model)
       record.line_items.clear
-      model.sales_order_items.each do | soi |
+      model.order_items.each do | order_item |
         record.add_line_item(
-          item_code:soi.item.code,
-          description:soi.item.description,
-          quantity:soi.quantity,
-          unit_amount:soi.unit_price,
+          item_code:order_item.item.name,
+          description:order_item.item.description,
+          quantity:order_item.quantity,
+          unit_amount:model.price_for_item(order_item.item),
           tax_type:'NONE',
           account_code: '3000')
       end
@@ -45,9 +60,10 @@ class XeroInvoicesSyncer < BaseXeroSyncer
     end
 
     def update_model_for_record (record)
+      binding.pry
       invoice_number = record.invoice_number
       invoice_number.slice! "testing9-nov-2015-";
-      model = SalesOrder.find(invoice_number.to_i)
+      model = Order.find(invoice_number.to_i)
       model.update_columns(xero_id:record.invoice_id)
     end
 end

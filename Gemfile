@@ -27,7 +27,7 @@ group :development do
   gem 'pry'
   gem 'pry-byebug'
   gem 'pry-rails'
-  gem 'http_logger'
+  gem 'httplog'
 end
 group :development, :test do
   gem 'spring'

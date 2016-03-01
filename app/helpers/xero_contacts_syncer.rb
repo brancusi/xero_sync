@@ -25,7 +25,7 @@ class XeroContactsSyncer < BaseXeroSyncer
     end
 
     def update_model_for_record (record)
-      model = Client.find(record.contact_number)
+      model = Location.find(record.contact_number)
       model.update_columns(xero_id:record.contact_id)
     end
 end
