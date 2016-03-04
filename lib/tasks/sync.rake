@@ -1,42 +1,82 @@
+LAST_LOCAL_SYNC_KEY = 'xero_last_local_sync'
+LAST_REMOTE_SYNC_KEY = 'xero_last_remote_sync'
 
 namespace :sync do
 
-  desc 'Sync all unsynced records to xero'
+  desc 'Sync all local then remote changes'
+  task :all => ["sync:local", "sync:remote"]
 
-  task :all => :environment do
+  desc 'Sync all local data to xero'
+  task :local => :environment do
 
     redis = Redis.new
 
     # If this is the first time we are syncing, let's go back to the start of time
-    last_sync = Maybe(redis.get('xero_syncer_last_synced')).fetch(100.years.ago.to_s)
-
-    last_synced_timestamp = DateTime.parse(last_sync)
+    last_sync_date_time = Maybe(redis.get(LAST_LOCAL_SYNC_KEY)).fetch(100.years.ago.to_s)
+    last_sync = DateTime.parse(last_sync_date_time)
 
     new_timestamp = DateTime.now
 
-    location_models = Location.where('updated_at > ?', last_synced_timestamp)
-    item_models = Item.where('updated_at > ?', last_synced_timestamp)
-    order_models = Order.where(fullfilled:true, order_type:'sales-order').where('updated_at > ?', last_synced_timestamp)
+    # item_models = Item.where('updated_at > ?', last_synced_timestamp)
+    # location_models = Location.where('updated_at > ?', last_synced_timestamp)
+    # order_models = Order.where(fullfilled:true, order_type:'sales-order').where('updated_at > ?', last_synced_timestamp)
+
+    begin
+      XeroItemsSyncer.new.sync_local(last_sync)
+    rescue => errors
+      p "Remote Item sync error: #{errors}"
+    end
 
     # begin
     #   XeroContactsSyncer.new.sync(location_models)
-    # rescue
-    #   p 'Contacts Sync Failed'
+    # rescue => errors
+    #   p "Contacts sync error: #{errors}"
     # end
     #
     # begin
-    #   XeroItemsSyncer.new.sync(item_models)
-    # rescue
-    #   p 'Items Sync Failed'
+    #   XeroInvoicesSyncer.new.sync(order_models)
+    # rescue => errors
+    #   p "Invoice sync error: #{errors}"
     # end
 
+    redis.set(LAST_LOCAL_SYNC_KEY, new_timestamp)
+  end
+
+  desc 'Sync all remote xero records to to local'
+  task :remote => :environment do
+
+    redis = Redis.new
+
+    # If this is the first time we are syncing, let's go back to the start of time
+    last_sync_date_time = Maybe(redis.get(LAST_REMOTE_SYNC_KEY)).fetch(100.years.ago.to_s)
+
+    last_sync = DateTime.parse(last_sync_date_time)
+
+    new_timestamp = DateTime.now
+
+    # item_models = Item.where('updated_at > ?', last_synced_timestamp)
+    # location_models = Location.where('updated_at > ?', last_synced_timestamp)
+    # order_models = Order.where(fullfilled:true, order_type:'sales-order').where('updated_at > ?', last_synced_timestamp)
+
     begin
-      XeroInvoicesSyncer.new.sync(order_models)
+      XeroItemsSyncer.new.sync_remote(last_sync)
     rescue => errors
-      p "Invoices Sync Failed #{errors}"
+      p "Remote Item sync error: #{errors}"
     end
 
-    # redis.set('xero_syncer_last_synced', new_timestamp)
+    # begin
+    #   XeroContactsSyncer.new.sync(location_models)
+    # rescue => errors
+    #   p "Contacts sync error: #{errors}"
+    # end
+    #
+    # begin
+    #   XeroInvoicesSyncer.new.sync(order_models)
+    # rescue => errors
+    #   p "Invoice sync error: #{errors}"
+    # end
+
+    redis.set(LAST_REMOTE_SYNC_KEY, new_timestamp)
   end
 
 end

@@ -3,9 +3,11 @@ class XeroInvoicesSyncer < BaseXeroSyncer
 
   def batch_save_records(records)
     begin
-      xero_client.Invoice.save_records(records)
+      if records.all? {|record| record.is_a? Xeroizer::Record::Invoice}
+        xero_client.Invoice.save_records(records)
+      end
     rescue => errors
-      p "Error batch saving: #{errors}"
+      p "Error batch saving invoices: #{errors}"
     end
   end
 
@@ -20,7 +22,6 @@ class XeroInvoicesSyncer < BaseXeroSyncer
     end
 
     def update_xero_record (record, model)
-      p 'updating'
       if record.status == 'DELETED'
         delete_order(model)
         return nil
@@ -36,12 +37,11 @@ class XeroInvoicesSyncer < BaseXeroSyncer
     end
 
     def create_xero_record (model)
-      p 'creating'
       update_xero_record(xero_client.Invoice.build(), model)
     end
 
     def delete_order (model)
-      p 'will delete order'
+      model.destroy
     end
 
     def create_order_items (record, model)
@@ -53,14 +53,13 @@ class XeroInvoicesSyncer < BaseXeroSyncer
           quantity:order_item.quantity,
           unit_amount:model.price_for_item(order_item.item),
           tax_type:'NONE',
-          account_code: '3000')
+          account_code: '400')
       end
 
       return record
     end
 
     def update_model_for_record (record)
-      binding.pry
       invoice_number = record.invoice_number
       invoice_number.slice! "testing9-nov-2015-";
       model = Order.find(invoice_number.to_i)
