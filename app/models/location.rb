@@ -3,7 +3,7 @@ class Location < ActiveRecord::Base
 	belongs_to :address
 	has_many :orders
 
-	def full_name
+	def xero_name
 		"#{code} - #{company.name} - #{name}"
 	end
 end

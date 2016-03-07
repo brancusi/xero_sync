@@ -1,4 +1,4 @@
-class XeroInvoicesSyncer < BaseXeroSyncer
+class XeroInvoicesSyncer < BaseSyncer
   include XeroUtils
 
   def batch_save_records(records)
@@ -31,7 +31,7 @@ class XeroInvoicesSyncer < BaseXeroSyncer
         record.due_date = model.delivery_date + model.location.company.terms
         record.status = "DRAFT"
         record.type = "ACCREC"
-        record.build_contact(contact_id:model.location.xero_id, name:model.location.full_name)
+        record.build_contact(contact_id:model.location.xero_id, name:model.location.xero_name)
         create_order_items(record, model)
       end
     end
