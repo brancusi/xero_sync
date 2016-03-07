@@ -17,4 +17,4 @@
 /log/*
 !/log/.keep
 /tmp
-vcr_cassettes
+/vcr_cassettes/*
