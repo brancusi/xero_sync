@@ -32,4 +32,6 @@ end
 group :test do
   gem 'vcr'
   gem 'webmock'
+  gem 'fakeredis'
+  gem 'factory_girl'
 end

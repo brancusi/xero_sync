@@ -1,0 +1,72 @@
+# Request - Get contacts: NW001 - Nature Well - Silverlake
+# Response - No match
+
+# Request - Get contacts: NW002 - Nature Well - Hollywood
+# Response - No match
+
+# Request - Put contacts: NW001, NW002
+# Response - Result set with new contacts
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.xero.com/api.xro/2.0/Contacts?where=Name==%22NW001%20-%20Nature%20Well%20-%20Silverlake%22
+  response:
+    status:
+      code: 200
+    body:
+      encoding: UTF-8
+      string:
+        "<Response xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+          <Status>OK</Status>
+        </Response>"
+    http_version:
+  recorded_at: Sun, 06 Mar 2016 23:56:59 GMT
+- request:
+    method: get
+    uri: https://api.xero.com/api.xro/2.0/Contacts?where=Name==%22NW002%20-%20Nature%20Well%20-%20Hollywood%22
+  response:
+    status:
+      code: 200
+    body:
+      encoding: UTF-8
+      string:
+        "<Response xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+          <Status>OK</Status>
+        </Response>"
+    http_version:
+  recorded_at: Sun, 06 Mar 2016 23:57:00 GMT
+- request:
+    method: put
+    uri: https://api.xero.com/api.xro/2.0/Contacts?summarizeErrors=false
+    body:
+      encoding: US-ASCII
+      string: xml=%3CContacts%3E%0A%20%20%3CContact%3E%0A%20%20%20%20%3CName%3ENW001%20-%20Nature%20Well%20-%20Silverlake%3C%2FName%3E%0A%20%20%3C%2FContact%3E%0A%20%20%3CContact%3E%0A%20%20%20%20%3CName%3ENW002%20-%20Nature%20Well%20-%20Hollywood%3C%2FName%3E%0A%20%20%3C%2FContact%3E%0A%3C%2FContacts%3E%0A
+  response:
+    status:
+      code: 200
+    body:
+      encoding: UTF-8
+      string:
+        "<Response xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+          <Id>6ab16fd0-2dae-46ef-b908-4520747ce26c</Id>
+          <Status>OK</Status>
+          <Contacts>
+            <Contact status=\"OK\">
+              <ContactID>491edcfe-c0d8-4e25-9bfd-bfe54dbf67f1</ContactID>
+              <ContactStatus>ACTIVE</ContactStatus>
+              <Name>NW001 - Nature Well - Silverlake</Name>
+              <IsSupplier>false</IsSupplier>
+              <IsCustomer>false</IsCustomer>
+            </Contact>
+            <Contact status=\"OK\">
+              <ContactID>bc488471-33fa-41bc-851d-47d1029b4778</ContactID>
+              <ContactStatus>ACTIVE</ContactStatus>
+              <Name>NW002 - Nature Well - Hollywood</Name>
+              <IsSupplier>false</IsSupplier>
+              <IsCustomer>false</IsCustomer>
+            </Contact>
+          </Response>"
+    http_version:
+  recorded_at: Sun, 06 Mar 2016 23:57:00 GMT
+recorded_with: VCR 3.0.1

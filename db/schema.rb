@@ -130,7 +130,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
 
   create_table "locations", force: :cascade do |t|
     t.string   "xero_id",        limit: 255
-    t.integer  "company_id"
+    t.integer  "company_id",                 null: false
     t.string   "name",           limit: 255, null: false
     t.string   "code",           limit: 255, null: false
     t.decimal  "delivery_rate",             default: 0.0

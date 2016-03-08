@@ -55,6 +55,11 @@ class BaseSyncer
       raise_must_override
     end
 
+    # OPTIONAL - Check if this record should be deleted
+    def should_delete?(record)
+      false
+    end
+
     # Responsible for finding the local model for this record
     # It is up to the subclass to determine lookup logic
     # or to create a new model if none is found.
@@ -128,8 +133,13 @@ class BaseSyncer
         end
 
         if record.present?
-          update_record(record, model)
-          return record
+          if should_delete? record
+            model.destroy
+            return nil
+          else
+            update_record(record, model)
+            return record
+          end
         else
           create_record(model)
         end
