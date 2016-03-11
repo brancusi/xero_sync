@@ -17,8 +17,8 @@ class LocationsSyncer < BaseSyncer
       record.name = model.xero_name
     end
 
-    def create_record(model)
-      xero.Contact.build(name:model.xero_name)
+    def create_record
+      xero.Contact.build
     end
 
     def save_records(records)

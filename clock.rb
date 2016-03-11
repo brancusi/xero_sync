@@ -7,7 +7,9 @@ module Clockwork
 
   every(5.seconds, SyncLocalItemsWorker)
   every(5.seconds, SyncLocalLocationsWorker)
+  every(5.seconds, SyncLocalSalesOrdersWorker)
 
-  every(1.hour, SyncLocalItemsWorker)
+  every(1.hour, SyncRemoteItemsWorker)
   every(1.hour, SyncRemoteLocationsWorker)
+
 end

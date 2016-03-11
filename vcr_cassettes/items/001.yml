@@ -34,6 +34,7 @@ http_interactions:
             <Item status=\"OK\">
               <ItemID>b3d9696b-13f3-455a-aac9-c5b26e9b71ea</ItemID>
               <Code>Sunseed Chorizo</Code>
+              <Description>No description</Description>
               <IsSold>true</IsSold>
               <IsPurchased>true</IsPurchased>
             </Item>

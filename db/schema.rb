@@ -113,7 +113,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
   create_table "items", force: :cascade do |t|
     t.string   "xero_id",         limit: 255
     t.string   "name",            limit: 255,                 null: false
-    t.string   "description",     limit: 255
+    t.string   "description",     limit: 255, default: 'No description', null: false
     t.integer  "position"
     t.boolean  "is_sold",                     default: false, null: false
     t.boolean  "is_purchased",                default: true,  null: false

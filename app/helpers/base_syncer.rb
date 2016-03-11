@@ -51,7 +51,7 @@ class BaseSyncer
 
     # Create a new xero record. This is called when the find_xero methods
     # return nil
-    def create_record(model)
+    def create_record
       raise_must_override
     end
 
@@ -113,7 +113,7 @@ class BaseSyncer
     end
 
     def prepare_record(model)
-      begin
+      # begin
         record = nil
 
         if model.xero_id.present?
@@ -132,20 +132,27 @@ class BaseSyncer
           end
         end
 
+
+        # @TODO: Refactor this into steps like, shouldUpdateRecord, shouldUpdateModel.
+
+
+
         if record.present?
           if should_delete? record
-            model.destroy
+            # @TODO How should we handle deleting of the record?
             return nil
           else
             update_record(record, model)
             return record
           end
         else
-          create_record(model)
+          record = create_record
+          update_record(record, model)
+          return record
         end
-      rescue => errors
-        p "There was an error preparing this model: #{errors}"
-      end
+      # rescue => errors
+      #   p "There was an error preparing this model: #{errors}"
+      # end
     end
 
     def process_records(records)

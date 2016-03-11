@@ -20,8 +20,8 @@ class ItemsSyncer < BaseSyncer
       record.is_sold = model.is_sold
     end
 
-    def create_record(model)
-      xero.Item.build(code:model.name)
+    def create_record
+      xero.Item.build
     end
 
     def save_records(records)
