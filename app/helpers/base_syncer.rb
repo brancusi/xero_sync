@@ -55,9 +55,14 @@ class BaseSyncer
       raise_must_override
     end
 
+    # OPTIONAL - update local state from remote state
+    def update_local_state(record, model)
+      #
+    end
+
     # OPTIONAL - Check if this record should be deleted
-    def should_delete?(record)
-      false
+    def should_save_record?(record, model)
+      true
     end
 
     # Responsible for finding the local model for this record
@@ -113,46 +118,16 @@ class BaseSyncer
     end
 
     def prepare_record(model)
-      # begin
-        record = nil
+        record = _find_record(model)
 
-        if model.xero_id.present?
-          begin
-            record = find_record(model.xero_id)
-          rescue => errors
-            p "Error finding a record with that id: #{errors}"
-          end
-        end
+        _update_local_state(record, model)
 
-        if record.nil?
-          begin
-            record = find_record_by(model)
-          rescue => errors
-            p "Error finding record with that search criteria: #{errors}"
-          end
-        end
+        record = create_record if record.nil?
 
-
-        # @TODO: Refactor this into steps like, shouldUpdateRecord, shouldUpdateModel.
-
-
-
-        if record.present?
-          if should_delete? record
-            # @TODO How should we handle deleting of the record?
-            return nil
-          else
-            update_record(record, model)
-            return record
-          end
-        else
-          record = create_record
+        if should_save_record?(record, model)
           update_record(record, model)
           return record
         end
-      # rescue => errors
-      #   p "There was an error preparing this model: #{errors}"
-      # end
     end
 
     def process_records(records)
@@ -165,5 +140,30 @@ class BaseSyncer
           nil
         end
       }.compact
+    end
+
+    def _find_record(model)
+      record = nil
+      if model.xero_id.present?
+        begin
+          record = find_record(model.xero_id)
+        rescue => errors
+          p "Error finding record by xero_id: #{errors}"
+        end
+      end
+
+      if record.nil?
+        begin
+          record = find_record_by(model)
+        rescue => errors
+          p "Error finding record with that search criteria: #{errors}"
+        end
+      end
+
+      return record
+    end
+
+    def _update_local_state(record, model)
+      update_local_state(record, model) if record.present?
     end
 end

@@ -6,6 +6,7 @@ gem 'pg', '0.17.1'
 gem 'xeroizer', :git => 'git://github.com/waynerobinson/xeroizer.git'
 gem 'redis'
 gem 'monadic'
+gem 'aasm'
 gem 'httplog'
 
 # Job scheduling

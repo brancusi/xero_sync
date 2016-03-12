@@ -1,33 +1,48 @@
 class Order < ActiveRecord::Base
   include AASM
 
-  enum aasm_state: {
-    draft: 0,
-    processed: 1,
-    fulfilled: 2,
-    invoiced: 3,
-    deleted: 4,
-    voided: 5
+  after_create :generate_invoice_number
+
+  XERO_STATE_MAPPING = {
+    voided: 'VOIDED'
   }
 
-  aasm :skip_validation_on_save => true do
-    state :draft, :initial => true
-    state :processed
+  enum order_state: [ :pending, :fulfilled, :voided ]
+  aasm :order, :column => :order_state, :skip_validation_on_save => true do
+    state :pending, :initial => true
     state :fulfilled
-    state :invoiced
-    state :deleted
     state :voided
 
-    event :invoice do
-      transitions :from => :fulfilled, :to => :invoiced
+    event :fulfill do
+      transitions :from => :pending, :to => :fulfilled
     end
 
     event :void do
-      transitions :from => [:draft, :processed], :to => :deleted
-      transitions :from => [:fulfilled, :invoiced], :to => :voided
+      transitions :from => [:pending, :fulfilled], :to => :voided
     end
+  end
+
+  enum notifications_state: [ :unprocessed, :processed ]
+  aasm :notifications, :column => :notifications_state, :skip_validation_on_save => true do
+    state :unprocessed, :initial => true
+    state :processed
+
+    event :process do
+      transitions :from => :unprocessed, :to => :processed
+    end
+  end
+
+  def xero_state
+    XERO_STATE_MAPPING[self.aasm.current_state]
   end
 
   belongs_to :location
   has_many :order_items, -> { joins(:item).order('position') }, :dependent => :destroy, autosave: true
+
+  private
+    def generate_invoice_number
+      date = Date.today.strftime('%y%m%d')
+      self.order_number = "#{date}-#{id}"
+      save
+    end
 end

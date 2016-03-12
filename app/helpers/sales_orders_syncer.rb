@@ -6,22 +6,32 @@ class SalesOrdersSyncer < BaseSyncer
     end
 
     def find_record_by(model)
-      xero.Invoice.first(:where => {:invoice_number => model.id})
+      xero.Invoice.first(:where => {:invoice_number => model.order_number})
     end
 
     def find_records(timestamp)
       xero.Invoice.all({:modified_since => timestamp})
     end
 
-    def should_delete?(record)
-      record.status == 'DELETED'
+    def update_local_state(record, model)
+      case record.status
+      when 'DELETED'
+        model.void!
+      when 'VOIDED'
+        model.void!
+      end
+    end
+
+    def should_save_record? (record, model)
+      !model.voided? && !model.deleted?
     end
 
     def update_record(record, model)
-      record.invoice_number = model.id
+      record.invoice_number = model.order_number
       record.date = model.delivery_date
       record.due_date = model.delivery_date + model.location.company.terms
-      record.status = "DRAFT"
+      record.status = model.xero_state
+      record.sent_to_contact = true
       record.type = "ACCREC"
 
       record.build_contact(contact_id:model.location.xero_id, name:model.location.xero_name)
@@ -47,11 +57,11 @@ class SalesOrdersSyncer < BaseSyncer
     end
 
     def find_model(record)
-      Order.find_by(xero_id:record.invoice_id) || Order.find(record.invoice_number)
+      Order.find_by(xero_id:record.invoice_id) || Order.find_by(order_number:record.invoice_number)
     end
 
     def find_models(timestamp)
-      Order.where('updated_at > ?', timestamp)
+      Order.where(aasm_state: [2,3,4,5]).where('updated_at > ?', timestamp)
     end
 
     def update_model(model, record)
