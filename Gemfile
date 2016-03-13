@@ -35,4 +35,5 @@ group :test do
   gem 'webmock'
   gem 'fakeredis'
   gem 'factory_girl'
+  gem 'spy'
 end

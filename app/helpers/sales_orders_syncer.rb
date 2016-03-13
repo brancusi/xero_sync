@@ -23,16 +23,15 @@ class SalesOrdersSyncer < BaseSyncer
     end
 
     def should_save_record? (record, model)
-      !model.voided? && !model.deleted?
+      !model.voided?
     end
 
     def update_record(record, model)
       record.invoice_number = model.order_number
       record.date = model.delivery_date
       record.due_date = model.delivery_date + model.location.company.terms
-      record.status = model.xero_state
-      record.sent_to_contact = true
-      record.type = "ACCREC"
+      record.status = 'AUTHORISED'
+      record.type = 'ACCREC'
 
       record.build_contact(contact_id:model.location.xero_id, name:model.location.xero_name)
 
@@ -61,10 +60,11 @@ class SalesOrdersSyncer < BaseSyncer
     end
 
     def find_models(timestamp)
-      Order.where(aasm_state: [2,3,4,5]).where('updated_at > ?', timestamp)
+      Order.where(order_state: 1)
     end
 
     def update_model(model, record)
       model.update_columns(xero_id:record.invoice_id)
+      model.mark_synced!
     end
 end

@@ -1,3 +1,8 @@
+# Request  - Search for xero invoice by invoice number
+# Response - No match
+# Request  - Put a new invoice
+# Response - Newly created xero invoice
+
 ---
 http_interactions:
 - request:

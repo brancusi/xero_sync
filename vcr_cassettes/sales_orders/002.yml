@@ -1,3 +1,6 @@
+# Request  - Search for xero invoice by invoice number
+# Response - Matched invoice
+
 ---
 http_interactions:
 - request:

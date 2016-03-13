@@ -3,27 +3,33 @@ class Order < ActiveRecord::Base
 
   after_create :generate_invoice_number
 
-  XERO_STATE_MAPPING = {
-    voided: 'VOIDED'
-  }
+  belongs_to :location
+  has_many :order_items, -> { joins(:item).order('position') }, :dependent => :destroy, autosave: true
 
-  enum order_state: [ :pending, :fulfilled, :voided ]
-  aasm :order, :column => :order_state, :skip_validation_on_save => true do
+  # State machine settings
+  enum order_state: [ :pending, :fulfilled, :synced, :voided ]
+  enum notifications_state: [ :unprocessed, :processed ]
+
+  aasm :order, :column => :order_state, :skip_validation_on_save => true, :no_direct_assignment => true do
     state :pending, :initial => true
     state :fulfilled
+    state :synced
     state :voided
 
-    event :fulfill do
+    event :mark_fulfilled do
       transitions :from => :pending, :to => :fulfilled
     end
 
+    event :mark_synced do
+      transitions :from => :fulfilled, :to => :synced
+    end
+
     event :void do
-      transitions :from => [:pending, :fulfilled], :to => :voided
+      transitions :from => [:pending, :fulfilled, :synced], :to => :voided
     end
   end
 
-  enum notifications_state: [ :unprocessed, :processed ]
-  aasm :notifications, :column => :notifications_state, :skip_validation_on_save => true do
+  aasm :notifications, :column => :notifications_state, :skip_validation_on_save => true, :no_direct_assignment => true do
     state :unprocessed, :initial => true
     state :processed
 
@@ -31,13 +37,6 @@ class Order < ActiveRecord::Base
       transitions :from => :unprocessed, :to => :processed
     end
   end
-
-  def xero_state
-    XERO_STATE_MAPPING[self.aasm.current_state]
-  end
-
-  belongs_to :location
-  has_many :order_items, -> { joins(:item).order('position') }, :dependent => :destroy, autosave: true
 
   private
     def generate_invoice_number
