@@ -13,7 +13,7 @@ class SalesOrdersSyncer < BaseSyncer
       xero.Invoice.all({:modified_since => timestamp})
     end
 
-    def update_local_state(record, model)
+    def pre_flight_check(record, model)
       case record.status
       when 'DELETED'
         model.void!
@@ -37,13 +37,7 @@ class SalesOrdersSyncer < BaseSyncer
 
       record.line_items.clear
       model.order_items.each do | order_item |
-        record.add_line_item(
-          item_code:order_item.item.name,
-          description:order_item.item.description,
-          quantity:order_item.quantity,
-          unit_amount:order_item.unit_price,
-          tax_type:'NONE',
-          account_code: '400')
+        create_record_line_item(record, order_item)
       end
     end
 
@@ -64,7 +58,38 @@ class SalesOrdersSyncer < BaseSyncer
     end
 
     def update_model(model, record)
-      model.update_columns(xero_id:record.invoice_id)
-      model.mark_synced!
+      model.xero_id = record.invoice_id
+
+      if model.synced?
+        record.line_items.each do |line_item|
+          item = Item.find_by name: line_item.item_code
+          order_item = model.order_items.find_by(item:item) || create_model_order_item(model, line_item)
+          order_item.quantity = line_item.quantity
+          order_item.unit_price = line_item.unit_amount
+          order_item.save
+        end
+      end
+
+      model.save
+
+      model.mark_synced! if !model.voided?
     end
+
+    private
+      def create_record_line_item(record, order_item)
+        record.add_line_item(
+          item_code:order_item.item.name,
+          description:order_item.item.description,
+          quantity:order_item.quantity,
+          unit_amount:order_item.unit_price,
+          tax_type:'NONE',
+          account_code: '400')
+      end
+
+      def create_model_order_item(model, line_item)
+        item = Item.find_by name: line_item.item_code
+        model_item = OrderItem.create(
+          item:item,
+          order:model_item)
+      end
 end

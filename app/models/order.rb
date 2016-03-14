@@ -21,6 +21,7 @@ class Order < ActiveRecord::Base
     end
 
     event :mark_synced do
+      transitions :from => :synced, :to => :synced
       transitions :from => :fulfilled, :to => :synced
     end
 

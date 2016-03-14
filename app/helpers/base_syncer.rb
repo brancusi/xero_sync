@@ -55,9 +55,11 @@ class BaseSyncer
       raise_must_override
     end
 
-    # OPTIONAL - update local state from remote state
-    def update_local_state(record, model)
-      #
+    # OPTIONAL - hook called before update_model or save_records is called.
+    # A good place to void an item or change state of a local model based
+    # on remote record state.
+    def pre_flight_check(record, model)
+      # Do nothing
     end
 
     # OPTIONAL - Check if this record should be deleted
@@ -79,7 +81,7 @@ class BaseSyncer
     end
 
     # Update the local model based on the record
-    def update_model(record)
+    def update_model(model, record)
       raise_must_override
     end
 
@@ -118,11 +120,8 @@ class BaseSyncer
     end
 
     def prepare_record(model)
-        record = _find_record(model)
-
-        _update_local_state(record, model)
-
-        record = create_record if record.nil?
+        record = _find_or_create_record(model)
+        pre_flight_check(record, model)
 
         if should_save_record?(record, model)
           update_record(record, model)
@@ -133,8 +132,14 @@ class BaseSyncer
     def process_records(records)
       records.map {|record|
         begin
-          update_model(find_model(record), record)
-          record
+          model = find_model(record)
+          if model.present?
+            pre_flight_check(record, model)
+            update_model(model, record)
+            record
+          else
+            nil
+          end
         rescue => errors
           p "There was an error processing this record: #{errors}"
           nil
@@ -142,7 +147,11 @@ class BaseSyncer
       }.compact
     end
 
-    def _find_record(model)
+    def _find_or_create_record(model)
+      _find_record_by_id_or_other(model) || create_record
+    end
+
+    def _find_record_by_id_or_other(model)
       record = nil
       if model.xero_id.present?
         begin
@@ -161,9 +170,5 @@ class BaseSyncer
       end
 
       return record
-    end
-
-    def _update_local_state(record, model)
-      update_local_state(record, model) if record.present?
     end
 end
