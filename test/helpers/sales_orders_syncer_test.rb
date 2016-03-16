@@ -5,7 +5,7 @@ class SalesOrdersSyncerTest < ActiveSupport::TestCase
   # Local sync testing
   test "Remote deleted invoices should update to deleted locally" do
 
-    Item.create(name:'Sunseed Chorizo', xero_id:'b3d9696b-13f3-455a-aac9-c5b26e9b71ea')
+    Item.create(name:'Sunseed Chorizo')
 
     company = Company.create(name:'Nature Well')
     location = Location.create(name:'Silverlake', code:'NW001', company:company)
@@ -119,6 +119,32 @@ class SalesOrdersSyncerTest < ActiveSupport::TestCase
     order.reload
 
     assert order.order_items.all? {|order_item| order_item.quantity == 6}, 'Order item quantities did not match'
+  end
+
+  test "should remove order item if missing from remote record and local model is synced?" do
+    Item.create(name:'Sunseed Chorizo')
+
+    company = Company.create(name:'Nature Well')
+    location = Location.create(name:'Silverlake', code:'NW001', company:company)
+    order = Order.create(order_type:'sales-order', location:location, delivery_date:Date.parse('2016-03-01'))
+    order.order_number = 'remote-invoice-with-removed-order-item-number'
+    order.xero_id = 'remote-invoice-with-removed-order-item-id'
+    order.save
+
+    Item.all.each do |item|
+      OrderItem.create(item:item, quantity:5, unit_price:5, order:order)
+    end
+
+    order.mark_fulfilled!
+    order.mark_synced!
+
+    VCR.use_cassette('sales_orders/007') do
+      SalesOrdersSyncer.new.sync_remote(10.minutes.ago)
+    end
+
+    order.reload
+
+    assert order.order_items.empty?, 'Order items found when expected none'
   end
 
 end

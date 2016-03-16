@@ -68,6 +68,12 @@ class SalesOrdersSyncer < BaseSyncer
           order_item.unit_price = line_item.unit_amount
           order_item.save
         end
+
+        # Clear missing order_items
+        model.order_items.each do |order_item|
+          has_match = record.line_items.any? {|line_item| line_item.item_code == order_item.item.name}
+          order_item.destroy if !has_match
+        end
       end
 
       model.save
@@ -88,8 +94,6 @@ class SalesOrdersSyncer < BaseSyncer
 
       def create_model_order_item(model, line_item)
         item = Item.find_by name: line_item.item_code
-        model_item = OrderItem.create(
-          item:item,
-          order:model_item)
+        OrderItem.create(item:item, order:model)
       end
 end

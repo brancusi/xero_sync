@@ -41,8 +41,7 @@ class Order < ActiveRecord::Base
 
   private
     def generate_invoice_number
-      date = Date.today.strftime('%y%m%d')
-      self.order_number = "#{date}-#{id}"
+      self.order_number = "INV-#{delivery_date.strftime('%y%m%d')}-#{id}"
       save
     end
 end

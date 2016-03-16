@@ -43,28 +43,33 @@ ActiveRecord::Schema.define(version: 20151217220124) do
   add_index "companies", ["price_tier_id"], name: "index_companies_on_price_tier_id", using: :btree
   add_index "companies", ["tag"], name: "index_companies_on_tag", using: :btree
 
-  create_table "credit_items", force: :cascade do |t|
-    t.integer  "credit_id",              null: false
+  create_table "credit_note_items", force: :cascade do |t|
+    t.integer  "credit_note_id",              null: false
     t.integer  "item_id",                null: false
-    t.integer  "quantity",   default: 0, null: false
-    t.integer  "unit_price", default: 0, null: false
+    t.decimal  "quantity",   default: 0.0, null: false
+    t.decimal  "unit_price", default: 0.0, null: false
     t.text     "notes"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "credit_items", ["credit_id"], name: "index_credit_items_on_credit_id", using: :btree
-  add_index "credit_items", ["item_id"], name: "index_items_on_item_id", using: :btree
+  add_index "credit_note_items", ["credit_note_id"], name: "index_credit_note_items_on_credit_note_id", using: :btree
+  add_index "credit_note_items", ["item_id"], name: "index_items_on_item_id", using: :btree
 
-  create_table "credits", force: :cascade do |t|
+  create_table "credit_notes", force: :cascade do |t|
     t.string   "xero_id",     limit: 255
+    t.string   "credit_note_number", limit: 255
+    t.integer  "credit_note_state"
+    t.integer  "notifications_state"
     t.integer  "location_id",             null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.date     "date",                    null: false
   end
 
-  add_index "credits", ["location_id"], name: "index_credits_on_location_id", using: :btree
+  add_index "credit_notes", ["xero_id"], name: "index_credit_notes_on_xero_id", unique: true, using: :btree
+  add_index "credit_notes", ["credit_note_number"], name: "index_credit_notes_on_credit_note_number", unique: true, using: :btree
+  add_index "credit_notes", ["location_id"], name: "index_credit_notes_on_location_id", using: :btree
 
   create_table "item_desires", force: :cascade do |t|
     t.integer  "location_id"
@@ -269,9 +274,9 @@ ActiveRecord::Schema.define(version: 20151217220124) do
   add_index "visit_windows", ["location_id"], name: "index_visit_windows_on_location_id", using: :btree
 
   add_foreign_key "companies", "price_tiers"
-  add_foreign_key "credit_items", "credits"
-  add_foreign_key "credit_items", "items"
-  add_foreign_key "credits", "locations"
+  add_foreign_key "credit_note_items", "credit_notes"
+  add_foreign_key "credit_note_items", "items"
+  add_foreign_key "credit_notes", "locations"
   add_foreign_key "item_desires", "items"
   add_foreign_key "item_desires", "locations"
   add_foreign_key "item_levels", "items"
