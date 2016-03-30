@@ -32,17 +32,19 @@ class ItemsSyncer < BaseSyncer
       Item.find_by(xero_id:record.item_id) || Item.find_by(name:record.code)
     end
 
-    def find_models(timestamp)
-      Item.where('updated_at > ?', timestamp)
+    def find_models
+      Item.where(item_state: Item.item_states[:pending])
     end
 
     def update_model(model, record)
-      model.update_columns(
-        xero_id:record.item_id,
-        name:record.code,
-        description:record.description,
-        is_sold:Maybe(record.is_sold).truly?,
-        is_purchased:Maybe(record.is_purchased).truly?
-      )
+      model.xero_id = record.item_id
+      model.name = record.code
+      model.description = record.description if record.description.present?
+      model.is_sold = Maybe(record.is_sold).truly?
+      model.is_purchased = Maybe(record.is_purchased).truly?
+
+      model.save
+
+      model.mark_synced!
     end
 end

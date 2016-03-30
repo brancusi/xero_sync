@@ -33,14 +33,19 @@ class LocationsSyncer < BaseSyncer
       Location.find_by(xero_id:record.contact_id) || Location.find_by(code:code)
     end
 
-    def find_models(timestamp)
-      Location.where('updated_at > ?', timestamp)
+    def find_models
+      Location.where(location_state: Location.location_states[:pending])
     end
 
     def update_model(model, record)
       if record.name != model.xero_name
         warn "The remote xero name did not match the local value. This may be due to a user changing this contact in xero. Local name: #{model.xero_name} - Remote name: #{record.name}"
       end
-      model.update_columns(xero_id:record.contact_id)
+
+      model.xero_id = record.contact_id
+
+      model.save
+      
+      model.mark_synced!
     end
 end

@@ -7,7 +7,7 @@ class ItemsSyncerTest < ActiveSupport::TestCase
     Item.create(name:'Sunseed Chorizo')
 
     VCR.use_cassette('items/001') do
-      ItemsSyncer.new.sync_local(10.minutes.ago)
+      ItemsSyncer.new.sync_local
     end
 
     assert Item.first.xero_id.present?
@@ -19,7 +19,7 @@ class ItemsSyncerTest < ActiveSupport::TestCase
 
     result = nil
     VCR.use_cassette('items/003') do
-      result = ItemsSyncer.new.sync_local(10.minutes.ago)
+      result = ItemsSyncer.new.sync_local
     end
 
     assert_equal(result.first.code, new_name)

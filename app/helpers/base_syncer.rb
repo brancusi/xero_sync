@@ -3,15 +3,8 @@ class BaseSyncer
   include RedisUtils
 
   # Sync from local to xero
-  def sync_local(timestamp = fetch_last_local_sync(self))
-    start_timestamp = DateTime.now
-    result = process_local(find_models(timestamp))
-
-    if result
-      set_last_local_sync(self, start_timestamp)
-    end
-
-    return result
+  def sync_local
+    process_local(find_models)
   end
 
   # Sync from xero to local
@@ -76,7 +69,7 @@ class BaseSyncer
     end
 
     # Query local models based on last_updated timestamp
-    def find_models(timestamp)
+    def find_models
       raise_must_override
     end
 
@@ -111,10 +104,10 @@ class BaseSyncer
           begin
             process_records(records)
           rescue => errors
-            raise "Error processing records: #{records}"
+            raise "Error processing records for #{self.class}: #{records}"
           end
         else
-          raise "Error batch saving"
+          raise "Error batch saving for #{self.class}: #{records}"
         end
       end
     end

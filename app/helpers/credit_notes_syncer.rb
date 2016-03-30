@@ -51,7 +51,7 @@ class CreditNotesSyncer < BaseSyncer
       CreditNote.find_by(xero_id:record.credit_note_id) || CreditNote.find_by(credit_note_number:record.credit_note_number)
     end
 
-    def find_models(timestamp)
+    def find_models
       CreditNote.where(credit_note_state: 0)
     end
 

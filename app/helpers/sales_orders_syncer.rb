@@ -53,8 +53,8 @@ class SalesOrdersSyncer < BaseSyncer
       Order.find_by(xero_id:record.invoice_id) || Order.find_by(order_number:record.invoice_number)
     end
 
-    def find_models(timestamp)
-      Order.where(order_state: 1)
+    def find_models
+      Order.where(order_state: Order.order_states[:fulfilled])
     end
 
     def update_model(model, record)

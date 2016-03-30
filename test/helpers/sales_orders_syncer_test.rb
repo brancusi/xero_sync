@@ -21,7 +21,7 @@ class SalesOrdersSyncerTest < ActiveSupport::TestCase
 
     result = nil
     VCR.use_cassette('sales_orders/002') do
-      result = SalesOrdersSyncer.new.sync_local(10.minutes.ago)
+      result = SalesOrdersSyncer.new.sync_local
     end
 
     order.reload
@@ -48,7 +48,7 @@ class SalesOrdersSyncerTest < ActiveSupport::TestCase
     assert order.fulfilled?
 
     VCR.use_cassette('sales_orders/003') do
-      SalesOrdersSyncer.new.sync_local(10.minutes.ago)
+      SalesOrdersSyncer.new.sync_local
     end
 
     order.reload

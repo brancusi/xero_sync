@@ -8,7 +8,7 @@ class LocationsSyncerTest < ActiveSupport::TestCase
     Location.create(name:'Hollywood', code:'NW002', company:company)
 
     VCR.use_cassette('contacts/001') do
-      LocationsSyncer.new.sync_local(100.years.ago)
+      LocationsSyncer.new.sync_local
     end
 
     Location.all.each {|location|

@@ -28,3 +28,4 @@
 ### Dev
 
 Start Redis: redis-server /usr/local/etc/redis.conf
+Start Clockwork: bundle exec clockwork clock.rb

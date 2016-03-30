@@ -117,6 +117,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
 
   create_table "items", force: :cascade do |t|
     t.string   "xero_id",      limit: 255
+    t.integer  "item_state"
     t.string   "name",         limit: 255,                            null: false
     t.string   "description",  limit: 255, default: "No description", null: false
     t.integer  "position"
@@ -127,6 +128,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
     t.datetime "updated_at"
   end
 
+  add_index "items", ["item_state"], name: "index_items_on_item_state", using: :btree
   add_index "items", ["is_purchased"], name: "index_items_on_is_purchased", using: :btree
   add_index "items", ["is_sold"], name: "index_items_on_is_sold", using: :btree
   add_index "items", ["name"], name: "index_items_on_name", unique: true, using: :btree
@@ -135,6 +137,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
 
   create_table "locations", force: :cascade do |t|
     t.string   "xero_id",       limit: 255
+    t.integer  "location_state"
     t.integer  "company_id",                               null: false
     t.string   "name",          limit: 255,                null: false
     t.string   "code",          limit: 255,                null: false
@@ -146,6 +149,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
   end
 
   add_index "locations", ["address_id"], name: "index_locations_on_address_id", using: :btree
+  add_index "locations", ["location_state"], name: "index_locations_on_location_state", using: :btree
   add_index "locations", ["company_id"], name: "index_locations_on_company_id", using: :btree
   add_index "locations", ["xero_id"], name: "index_locations_on_xero_id", unique: true, using: :btree
 
@@ -203,6 +207,7 @@ ActiveRecord::Schema.define(version: 20151217220124) do
 
   create_table "route_visits", force: :cascade do |t|
     t.integer  "route_plan_id",                  null: false
+    t.integer  "route_visit_state"
     t.text     "notes"
     t.integer  "arrive_at"
     t.string   "depart_at"
@@ -212,11 +217,11 @@ ActiveRecord::Schema.define(version: 20151217220124) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "completed_at"
-    t.boolean  "fullfilled"
   end
 
   add_index "route_visits", ["route_plan_id"], name: "index_route_visits_on_route_plan_id", using: :btree
   add_index "route_visits", ["visit_window_id"], name: "index_route_visits_on_visit_window_id", using: :btree
+  add_index "route_visits", ["route_visit_state"], name: "index_route_visits_on_route_visit_state", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  limit: 255, default: "", null: false
